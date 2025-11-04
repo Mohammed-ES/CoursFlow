@@ -1110,13 +1110,5 @@ When rate limit is exceeded:
 
 ---
 
-## Need Help?
-
-- 📧 Email: api-support@coursflow.com
-- 📖 Documentation: [Full API Docs](https://docs.coursflow.com)
-- 🐛 Report Issues: [GitHub Issues](https://github.com/Mohammed-ES/CoursFlow/issues)
-
----
-
 **Last Updated:** November 4, 2025  
 **API Version:** 1.0.0
