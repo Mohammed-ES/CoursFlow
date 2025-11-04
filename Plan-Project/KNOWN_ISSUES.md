@@ -785,8 +785,7 @@ If you encounter an issue not listed here:
 
 1. **Check Laravel logs:** `backend/storage/logs/laravel.log`
 2. **Check browser console:** F12 -> Console
-3. **Search GitHub Issues:** [CoursFlow Issues](https://github.com/Mohammed-ES/CoursFlow/issues)
-4. **Create new issue:** Include error messages, screenshots, and steps to reproduce
+3. **Create new issue:** Include error messages, screenshots, and steps to reproduce
 
 ---
 
