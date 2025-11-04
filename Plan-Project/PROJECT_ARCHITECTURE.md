@@ -1,696 +1,1390 @@
-# 🏗️ CoursFlow Project Architecture# 🏗️ Architecture du Projet CoursFlow
+# 🏗️ CoursFlow Project Architecture# 🏗️ CoursFlow Project Architecture# 🏗️ Architecture du Projet CoursFlow
 
 
 
-## 📊 System Overview## 📊 Vue d'Ensemble du Système
+## 📊 System Overview
 
 
 
-``````
+```## 📊 System Overview## 📊 Vue d'Ensemble du Système
 
-┌─────────────────────────────────────────────────────────────┐┌─────────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────────┐
 
-│                    COURSFLOW PLATFORM                        ││                    COURSFLOW PLATFORM                        │
+│                    COURSFLOW PLATFORM                        │
 
-│              Course Management System (LMS)                  ││              Course Management System (LMS)                  │
+│         Learning Management System (LMS) with AI            │
 
-└─────────────────────────────────────────────────────────────┘└─────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────┘``````
 
-                            │                            │
+                            │
 
-        ┌───────────────────┼───────────────────┐        ┌───────────────────┼───────────────────┐
+        ┌───────────────────┼───────────────────┐┌─────────────────────────────────────────────────────────────┐┌─────────────────────────────────────────────────────────────┐
 
-        │                   │                   │        │                   │                   │
+        │                   │                   │
 
-   ┌────▼────┐         ┌────▼────┐        ┌────▼────┐   ┌────▼────┐         ┌────▼────┐        ┌────▼────┐
+   ┌────▼────┐         ┌────▼────┐        ┌────▼────┐│                    COURSFLOW PLATFORM                        ││                    COURSFLOW PLATFORM                        │
 
-   │ STUDENT │         │ TEACHER │        │  ADMIN  │   │ STUDENT │         │ TEACHER │        │  ADMIN  │
+   │ STUDENT │         │ TEACHER │        │  ADMIN  │
 
-   │ MODULE  │         │ MODULE  │        │ MODULE  │   │ MODULE  │         │ MODULE  │        │ MODULE  │
+   │ MODULE  │         │ MODULE  │        │ MODULE  ││              Course Management System (LMS)                  ││              Course Management System (LMS)                  │
 
-   └────┬────┘         └────┬────┘        └────┬────┘   └────┬────┘         └────┬────┘        └────┬────┘
+   └────┬────┘         └────┬────┘        └────┬────┘
 
-        │                   │                   │        │                   │                   │
+        │                   │                   │└─────────────────────────────────────────────────────────────┘└─────────────────────────────────────────────────────────────┘
+
+        └───────────────────┼───────────────────┘
+
+                            │                            │                            │
+
+        ┌───────────────────┴───────────────────┐
+
+        │                                       │        ┌───────────────────┼───────────────────┐        ┌───────────────────┼───────────────────┐
+
+   ┌────▼────────┐                      ┌──────▼──────┐
+
+   │   FRONTEND  │                      │   BACKEND   │        │                   │                   │        │                   │                   │
+
+   │ React + TS  │◄─────REST API───────►│  Laravel 10 │
+
+   │  Port 5173  │      (Sanctum)       │  Port 8000  │   ┌────▼────┐         ┌────▼────┐        ┌────▼────┐   ┌────▼────┐         ┌────▼────┐        ┌────▼────┐
+
+   └─────────────┘                      └──────┬──────┘
+
+                                              │   │ STUDENT │         │ TEACHER │        │  ADMIN  │   │ STUDENT │         │ TEACHER │        │  ADMIN  │
+
+                                   ┌──────────┴──────────┐
+
+                                   │                     │   │ MODULE  │         │ MODULE  │        │ MODULE  │   │ MODULE  │         │ MODULE  │        │ MODULE  │
+
+                            ┌──────▼──────┐      ┌──────▼──────┐
+
+                            │   MySQL     │      │  Gemini AI  │   └────┬────┘         └────┬────┘        └────┬────┘   └────┬────┘         └────┬────┘        └────┬────┘
+
+                            │  Database   │      │     API     │
+
+                            └─────────────┘      └─────────────┘        │                   │                   │        │                   │                   │
+
+```
 
         └───────────────────┼───────────────────┘        └───────────────────┼───────────────────┘
 
+---
+
                             │                            │
+
+## 🎯 System Modules
 
         ┌───────────────────┴───────────────────┐        ┌───────────────────┴───────────────────┐
 
+### 1. Student Module
+
         │                                       │        │                                       │
 
-   ┌────▼────────┐                      ┌──────▼──────┐   ┌────▼────────┐                      ┌──────▼──────┐
+**Main Files:**
 
-   │   FRONTEND  │                      │   BACKEND   │   │   FRONTEND  │                      │   BACKEND   │
+- `frontend/src/pages/student/StudentDashboard.tsx`   ┌────▼────────┐                      ┌──────▼──────┐   ┌────▼────────┐                      ┌──────▼──────┐
 
-   │ React + TS  │◄─────REST API───────►│  Laravel 10 │   │ React + TS  │◄─────REST API───────►│  Laravel 10 │
+- `frontend/src/pages/student/StudentProfile.tsx`
 
-   └─────────────┘                      └──────┬──────┘   └─────────────┘                      └──────┬──────┘
+- `frontend/src/components/student/StudentSidebar.tsx`   │   FRONTEND  │                      │   BACKEND   │   │   FRONTEND  │                      │   BACKEND   │
 
-                                              │                                              │
+- `backend/app/Http/Controllers/Api/StudentController.php`
 
-                                        ┌─────▼─────┐                                        ┌─────▼─────┐
+- `backend/app/Models/Student.php`   │ React + TS  │◄─────REST API───────►│  Laravel 10 │   │ React + TS  │◄─────REST API───────►│  Laravel 10 │
 
-                                        │   MySQL   │                                        │   MySQL   │
+
+
+**Features:**   └─────────────┘                      └──────┬──────┘   └─────────────┘                      └──────┬──────┘
+
+- ✅ Dashboard with statistics
+
+- ✅ Profile management                                              │                                              │
+
+- ✅ Enrolled courses display
+
+- ✅ AI-powered quiz taking                                        ┌─────▼─────┐                                        ┌─────▼─────┐
+
+- ✅ Event calendar
+
+- ✅ Real-time notifications                                        │   MySQL   │                                        │   MySQL   │
+
+- ✅ Progress tracking
 
                                         │ Database  │                                        │ Database  │
 
+**Key Components:**
+
                                         └───────────┘                                        └───────────┘
 
-``````
+| Component | Purpose |
+
+|-----------|---------|``````
+
+| `StudentDashboard.tsx` | Main dashboard with stats and enrolled courses |
+
+| `StudentProfile.tsx` | Profile management and settings |
+
+| `CourseCard.tsx` | Display course information |
+
+| `QuizInterface.tsx` | Interactive quiz taking with AI correction |------
+
+| `Calendar.tsx` | Event and deadline tracking |
 
 
 
-------
-
-
+---
 
 ## 🎯 System Modules## 🎯 Modules du Système
 
+### 2. Teacher Module
 
 
-### 1. Student Module### 1. Module Étudiant (Student)
 
-**Fichiers principaux :**
+**Main Files:**
 
-**Main Files:**- `frontend/src/pages/student/StudentDashboard.tsx`
+- `frontend/src/pages/teacher/TeacherDashboard.tsx`### 1. Student Module### 1. Module Étudiant (Student)
 
-- `frontend/src/pages/student/StudentDashboard.tsx`- `frontend/src/pages/student/StudentProfile.tsx`
+- `frontend/src/pages/teacher/TeacherCourses.tsx`
 
-- `frontend/src/pages/student/StudentProfile.tsx`- `frontend/src/components/student/StudentSidebar.tsx`
-
-- `frontend/src/components/student/StudentSidebar.tsx`- `backend/app/Http/Controllers/Api/StudentController.php`
-
-- `backend/app/Http/Controllers/Api/StudentController.php`- `backend/app/Models/Student.php`
-
-- `backend/app/Models/Student.php`
-
-**Fonctionnalités :**
-
-**Features:**- ✅ Tableau de bord avec statistiques
-
-- ✅ Dashboard with statistics- ✅ Gestion du profil
-
-- ✅ Profile management- ✅ Affichage des cours inscrits
-
-- ✅ Enrolled courses display- ✅ Passage de quiz avec correction AI
-
-- ✅ AI-powered quiz taking- ✅ Calendrier des événements
-
-- ✅ Events calendar- ✅ Notifications en temps réel
-
-- ✅ Real-time notifications- ✅ Assistant AI Gemini
-
-- ✅ Gemini AI assistant
-
-**Relations Base de Données :**
-
-**Database Relations:**```sql
-
-```sqlstudents
-
-students├── user_id (FK → users)
-
-├── user_id (FK → users)├── paidCourses (Many-to-Many via course_student)
-
-├── paidCourses (Many-to-Many via course_student)├── quizAttempts (One-to-Many)
-
-├── quizAttempts (One-to-Many)└── events (Many-to-Many via student_events)
-
-└── events (Many-to-Many via student_events)```
-
-```
-
----
-
----
-
-### 2. Module Enseignant (Teacher)
-
-### 2. Teacher Module**Fichiers principaux :**
-
-- `frontend/src/pages/teacher/TeacherDashboard.tsx`
-
-**Main Files:**- `frontend/src/pages/teacher/TeacherCourses.tsx`
-
-- `frontend/src/pages/teacher/TeacherDashboard.tsx`- `frontend/src/pages/teacher/TeacherQuizzes.tsx`
-
-- `frontend/src/pages/teacher/TeacherCourses.tsx`- `backend/app/Http/Controllers/Api/TeacherController.php`
-
-- `frontend/src/pages/teacher/TeacherQuizzes.tsx`- `backend/app/Models/Teacher.php`
+- `frontend/src/pages/teacher/TeacherQuizzes.tsx`**Fichiers principaux :**
 
 - `backend/app/Http/Controllers/Api/TeacherController.php`
 
-- `backend/app/Models/Teacher.php`**Fonctionnalités :**
+- `backend/app/Models/Teacher.php`**Main Files:**- `frontend/src/pages/student/StudentDashboard.tsx`
 
-- ✅ Création et gestion de cours
 
-**Features:**- ✅ Gestion de quiz avec AI
+
+**Features:**- `frontend/src/pages/student/StudentDashboard.tsx`- `frontend/src/pages/student/StudentProfile.tsx`
+
+- ✅ Course creation and management
+
+- ✅ Quiz creation and editing- `frontend/src/pages/student/StudentProfile.tsx`- `frontend/src/components/student/StudentSidebar.tsx`
+
+- ✅ AI quiz generation (Gemini)
+
+- ✅ Student performance tracking- `frontend/src/components/student/StudentSidebar.tsx`- `backend/app/Http/Controllers/Api/StudentController.php`
+
+- ✅ Automated grading
+
+- ✅ Analytics dashboard- `backend/app/Http/Controllers/Api/StudentController.php`- `backend/app/Models/Student.php`
+
+- ✅ Content management
+
+- `backend/app/Models/Student.php`
+
+**Key Components:**
+
+**Fonctionnalités :**
+
+| Component | Purpose |
+
+|-----------|---------|**Features:**- ✅ Tableau de bord avec statistiques
+
+| `TeacherDashboard.tsx` | Teacher statistics and overview |
+
+| `CourseCreator.tsx` | Create and edit courses |- ✅ Dashboard with statistics- ✅ Gestion du profil
+
+| `QuizCreator.tsx` | Design quizzes with multiple question types |
+
+| `AIQuizGenerator.tsx` | Generate quizzes using Gemini AI |- ✅ Profile management- ✅ Affichage des cours inscrits
+
+| `StudentList.tsx` | View and manage enrolled students |
+
+| `GradingPanel.tsx` | Review and manage quiz results |- ✅ Enrolled courses display- ✅ Passage de quiz avec correction AI
+
+
+
+---- ✅ AI-powered quiz taking- ✅ Calendrier des événements
+
+
+
+### 3. Admin Module- ✅ Events calendar- ✅ Notifications en temps réel
+
+
+
+**Main Files:**- ✅ Real-time notifications- ✅ Assistant AI Gemini
+
+- `frontend/src/pages/admin/AdminDashboard.tsx`
+
+- `frontend/src/pages/admin/AdminUsers.tsx`- ✅ Gemini AI assistant
+
+- `frontend/src/pages/admin/AdminCourses.tsx`
+
+- `backend/app/Http/Controllers/Api/AdminController.php`**Relations Base de Données :**
+
+- `backend/app/Models/Admin.php`
+
+**Database Relations:**```sql
+
+**Features:**
+
+- ✅ User management (students, teachers, admins)```sqlstudents
+
+- ✅ Course approval and publishing
+
+- ✅ System analyticsstudents├── user_id (FK → users)
+
+- ✅ Payment tracking
+
+- ✅ Security controls├── user_id (FK → users)├── paidCourses (Many-to-Many via course_student)
+
+- ✅ Database management
+
+- ✅ Platform configuration├── paidCourses (Many-to-Many via course_student)├── quizAttempts (One-to-Many)
+
+
+
+**Key Components:**├── quizAttempts (One-to-Many)└── events (Many-to-Many via student_events)
+
+
+
+| Component | Purpose |└── events (Many-to-Many via student_events)```
+
+|-----------|---------|
+
+| `AdminDashboard.tsx` | Platform-wide statistics and overview |```
+
+| `UserManagement.tsx` | Create, edit, and delete users |
+
+| `CourseApproval.tsx` | Review and approve teacher courses |---
+
+| `PaymentTracking.tsx` | Monitor enrollment payments |
+
+| `SystemSettings.tsx` | Configure platform settings |---
+
+| `Analytics.tsx` | View detailed platform analytics |
+
+### 2. Module Enseignant (Teacher)
+
+---
+
+### 2. Teacher Module**Fichiers principaux :**
+
+## 🗄️ Database Schema
+
+- `frontend/src/pages/teacher/TeacherDashboard.tsx`
+
+### Core Tables
+
+**Main Files:**- `frontend/src/pages/teacher/TeacherCourses.tsx`
+
+#### 1. users
+
+```sql- `frontend/src/pages/teacher/TeacherDashboard.tsx`- `frontend/src/pages/teacher/TeacherQuizzes.tsx`
+
+CREATE TABLE users (
+
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,- `frontend/src/pages/teacher/TeacherCourses.tsx`- `backend/app/Http/Controllers/Api/TeacherController.php`
+
+    name VARCHAR(255) NOT NULL,
+
+    email VARCHAR(255) UNIQUE NOT NULL,- `frontend/src/pages/teacher/TeacherQuizzes.tsx`- `backend/app/Models/Teacher.php`
+
+    password VARCHAR(255) NOT NULL,
+
+    role ENUM('student', 'teacher', 'admin') NOT NULL,- `backend/app/Http/Controllers/Api/TeacherController.php`
+
+    google_id VARCHAR(255) NULL,
+
+    email_verified_at TIMESTAMP NULL,- `backend/app/Models/Teacher.php`**Fonctionnalités :**
+
+    remember_token VARCHAR(100) NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,- ✅ Création et gestion de cours
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+);**Features:**- ✅ Gestion de quiz avec AI
+
+```
 
 - ✅ Course creation and management- ✅ Suivi des étudiants
 
-- ✅ AI-powered quiz management- ✅ Calendrier professionnel
+#### 2. students
 
-- ✅ Student tracking- ✅ Gestion des présences
+```sql- ✅ AI-powered quiz management- ✅ Calendrier professionnel
 
-- ✅ Professional calendar- ✅ Statistiques de performance
+CREATE TABLE students (
 
-- ✅ Attendance management
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,- ✅ Student tracking- ✅ Gestion des présences
 
-- ✅ Performance statistics**Relations Base de Données :**
+    user_id BIGINT NOT NULL,
 
-```sql
+    student_id VARCHAR(50) UNIQUE NOT NULL,- ✅ Professional calendar- ✅ Statistiques de performance
 
-**Database Relations:**teachers
+    date_of_birth DATE NULL,
+
+    phone VARCHAR(20) NULL,- ✅ Attendance management
+
+    address TEXT NULL,
+
+    enrollment_date DATE NOT NULL,- ✅ Performance statistics**Relations Base de Données :**
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,```sql
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+
+);**Database Relations:**teachers
+
+```
 
 ```sql├── user_id (FK → users)
 
-teachers├── courses (One-to-Many)
+#### 3. teachers
 
-├── user_id (FK → users)├── quizzes (One-to-Many)
+```sqlteachers├── courses (One-to-Many)
 
-├── courses (One-to-Many)└── events (One-to-Many)
+CREATE TABLE teachers (
 
-├── quizzes (One-to-Many)```
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,├── user_id (FK → users)├── quizzes (One-to-Many)
 
-└── events (One-to-Many)
+    user_id BIGINT NOT NULL,
 
-```---
+    teacher_id VARCHAR(50) UNIQUE NOT NULL,├── courses (One-to-Many)└── events (One-to-Many)
 
+    specialization VARCHAR(255) NULL,
 
+    phone VARCHAR(20) NULL,├── quizzes (One-to-Many)```
+
+    bio TEXT NULL,
+
+    hire_date DATE NOT NULL,└── events (One-to-Many)
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,```---
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+
+);
+
+```
 
 ---### 3. Module Administrateur (Admin)
 
-**Fichiers principaux :**
+#### 4. admins
 
-### 3. Administrator Module- `frontend/src/pages/admin/AdminDashboard.tsx`
+```sql**Fichiers principaux :**
 
-- `frontend/src/pages/admin/AdminUsers.tsx`
+CREATE TABLE admins (
 
-**Main Files:**- `frontend/src/pages/admin/AdminPayments.tsx`
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,### 3. Administrator Module- `frontend/src/pages/admin/AdminDashboard.tsx`
 
-- `frontend/src/pages/admin/AdminDashboard.tsx`- `backend/app/Http/Controllers/Api/AdminController.php`
+    user_id BIGINT NOT NULL,
 
-- `frontend/src/pages/admin/AdminUsers.tsx`
+    admin_id VARCHAR(50) UNIQUE NOT NULL,- `frontend/src/pages/admin/AdminUsers.tsx`
+
+    phone VARCHAR(20) NULL,
+
+    department VARCHAR(255) NULL,**Main Files:**- `frontend/src/pages/admin/AdminPayments.tsx`
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,- `frontend/src/pages/admin/AdminDashboard.tsx`- `backend/app/Http/Controllers/Api/AdminController.php`
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+
+);- `frontend/src/pages/admin/AdminUsers.tsx`
+
+```
 
 - `frontend/src/pages/admin/AdminPayments.tsx`**Fonctionnalités :**
 
-- `backend/app/Http/Controllers/Api/AdminController.php`- ✅ Gestion des utilisateurs (CRUD)
+#### 5. courses
 
-- ✅ Gestion des paiements
+```sql- `backend/app/Http/Controllers/Api/AdminController.php`- ✅ Gestion des utilisateurs (CRUD)
 
-**Features:**- ✅ Supervision des cours
+CREATE TABLE courses (
 
-- ✅ User management (CRUD)- ✅ Analytics globales
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,- ✅ Gestion des paiements
 
-- ✅ Payment management- ✅ Gestion des notifications
+    course_code VARCHAR(50) UNIQUE NOT NULL,
 
-- ✅ Course supervision- ✅ Configuration du système
+    title VARCHAR(255) NOT NULL,**Features:**- ✅ Supervision des cours
 
-- ✅ Global analytics
+    description TEXT NULL,
 
-- ✅ Notification management**Relations Base de Données :**
+    teacher_id BIGINT NOT NULL,- ✅ User management (CRUD)- ✅ Analytics globales
 
-- ✅ System configuration```sql
+    category VARCHAR(100) NULL,
 
-users (role = 'admin')
+    level ENUM('beginner', 'intermediate', 'advanced') NOT NULL,- ✅ Payment management- ✅ Gestion des notifications
+
+    duration_hours INT NULL,
+
+    price DECIMAL(10, 2) DEFAULT 0.00,- ✅ Course supervision- ✅ Configuration du système
+
+    max_students INT DEFAULT 30,
+
+    status ENUM('draft', 'published', 'archived') DEFAULT 'draft',- ✅ Global analytics
+
+    start_date DATE NULL,
+
+    end_date DATE NULL,- ✅ Notification management**Relations Base de Données :**
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,- ✅ System configuration```sql
+
+    FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
+
+);users (role = 'admin')
+
+```
 
 **Database Relations:**├── students (supervision)
 
-```sql├── teachers (supervision)
+#### 6. enrollments
 
-users (role = 'admin')├── courses (supervision)
+```sql```sql├── teachers (supervision)
 
-├── students (supervision)└── payments (gestion)
+CREATE TABLE enrollments (
 
-├── teachers (supervision)```
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,users (role = 'admin')├── courses (supervision)
 
-├── courses (supervision)
+    student_id BIGINT NOT NULL,
 
-└── payments (management)---
+    course_id BIGINT NOT NULL,├── students (supervision)└── payments (gestion)
+
+    enrollment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    payment_status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',├── teachers (supervision)```
+
+    payment_amount DECIMAL(10, 2) NULL,
+
+    status ENUM('active', 'completed', 'dropped') DEFAULT 'active',├── courses (supervision)
+
+    progress_percentage DECIMAL(5, 2) DEFAULT 0.00,
+
+    completion_date TIMESTAMP NULL,└── payments (management)---
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,```
+
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,## 🗄️ Base de Données - Structure Complète
+
+    UNIQUE KEY unique_enrollment (student_id, course_id)
+
+);---
 
 ```
-
-## 🗄️ Base de Données - Structure Complète
-
----
 
 ### Tables Principales
 
-## 🗄️ Database - Complete Structure
+#### 7. quizzes
 
-#### 1. **users** (Authentification)
+```sql## 🗄️ Database - Complete Structure
 
-### Main Tables```sql
+CREATE TABLE quizzes (
 
-- id (PK)
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,#### 1. **users** (Authentification)
 
-#### 1. **users** (Authentication)- name
+    course_id BIGINT NOT NULL,
 
-```sql- email (unique)
+    title VARCHAR(255) NOT NULL,### Main Tables```sql
 
-- id (PK)- password (hashed)
+    description TEXT NULL,
 
-- name- role (student/teacher/admin)
+    duration_minutes INT NOT NULL,- id (PK)
 
-- email (unique)- email_verified_at
+    passing_score DECIMAL(5, 2) DEFAULT 50.00,
 
-- password (hashed)- google_id (OAuth)
+    max_attempts INT DEFAULT 3,#### 1. **users** (Authentication)- name
 
-- role (student/teacher/admin)- remember_token
+    is_published BOOLEAN DEFAULT FALSE,
 
-- email_verified_at- created_at, updated_at
+    created_by BIGINT NOT NULL,```sql- email (unique)
 
-- google_id (OAuth)```
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-- remember_token
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,- id (PK)- password (hashed)
 
-- created_at, updated_at#### 2. **students** (Profils Étudiants)
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
 
-``````sql
+    FOREIGN KEY (created_by) REFERENCES teachers(id) ON DELETE CASCADE- name- role (student/teacher/admin)
 
-- id (PK)
+);
+
+```- email (unique)- email_verified_at
+
+
+
+#### 8. quiz_questions- password (hashed)- google_id (OAuth)
+
+```sql
+
+CREATE TABLE quiz_questions (- role (student/teacher/admin)- remember_token
+
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    quiz_id BIGINT NOT NULL,- email_verified_at- created_at, updated_at
+
+    question_text TEXT NOT NULL,
+
+    question_type ENUM('multiple_choice', 'true_false', 'short_answer', 'essay') NOT NULL,- google_id (OAuth)```
+
+    points DECIMAL(5, 2) DEFAULT 1.00,
+
+    correct_answer TEXT NULL,- remember_token
+
+    options JSON NULL,
+
+    order_number INT DEFAULT 0,- created_at, updated_at#### 2. **students** (Profils Étudiants)
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,``````sql
+
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+
+);- id (PK)
+
+```
 
 #### 2. **students** (Student Profiles)- user_id (FK → users)
 
-```sql- phone
+#### 9. quiz_attempts
 
-- id (PK)- address
+```sql```sql- phone
 
-- user_id (FK → users)- date_of_birth
+CREATE TABLE quiz_attempts (
 
-- phone- profile_image
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,- id (PK)- address
 
-- address- created_at, updated_at
+    quiz_id BIGINT NOT NULL,
 
-- date_of_birth```
+    student_id BIGINT NOT NULL,- user_id (FK → users)- date_of_birth
+
+    attempt_number INT NOT NULL,
+
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,- phone- profile_image
+
+    submitted_at TIMESTAMP NULL,
+
+    score DECIMAL(5, 2) NULL,- address- created_at, updated_at
+
+    ai_feedback TEXT NULL,
+
+    status ENUM('in_progress', 'submitted', 'graded') DEFAULT 'in_progress',- date_of_birth```
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,- profile_image
+
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
+
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE- created_at, updated_at#### 3. **teachers** (Profils Enseignants)
+
+);
+
+`````````sql
+
+
+
+#### 10. quiz_answers- id (PK)
+
+```sql
+
+CREATE TABLE quiz_answers (#### 3. **teachers** (Teacher Profiles)- user_id (FK → users)
+
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    attempt_id BIGINT NOT NULL,```sql- specialization
+
+    question_id BIGINT NOT NULL,
+
+    answer_text TEXT NULL,- id (PK)- bio
+
+    is_correct BOOLEAN NULL,
+
+    points_earned DECIMAL(5, 2) DEFAULT 0.00,- user_id (FK → users)- phone
+
+    ai_feedback TEXT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,- specialization- profile_image
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (attempt_id) REFERENCES quiz_attempts(id) ON DELETE CASCADE,- bio- created_at, updated_at
+
+    FOREIGN KEY (question_id) REFERENCES quiz_questions(id) ON DELETE CASCADE
+
+);- phone```
+
+```
 
 - profile_image
 
-- created_at, updated_at#### 3. **teachers** (Profils Enseignants)
+#### 11. notifications
 
-``````sql
+```sql- created_at, updated_at#### 4. **courses** (Cours)
 
-- id (PK)
+CREATE TABLE notifications (
 
-#### 3. **teachers** (Teacher Profiles)- user_id (FK → users)
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,``````sql
 
-```sql- specialization
+    user_id BIGINT NOT NULL,
 
-- id (PK)- bio
+    type VARCHAR(50) NOT NULL,- id (PK)
 
-- user_id (FK → users)- phone
+    title VARCHAR(255) NOT NULL,
 
-- specialization- profile_image
+    message TEXT NOT NULL,#### 4. **courses** (Courses)- teacher_id (FK → teachers)
 
-- bio- created_at, updated_at
+    is_read BOOLEAN DEFAULT FALSE,
 
-- phone```
+    related_id BIGINT NULL,```sql- title
 
-- profile_image
+    related_type VARCHAR(50) NULL,
 
-- created_at, updated_at#### 4. **courses** (Cours)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,- id (PK)- description
 
-``````sql
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-- id (PK)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE- teacher_id (FK → teachers)- category
 
-#### 4. **courses** (Courses)- teacher_id (FK → teachers)
+);
 
-```sql- title
+```- title- level (beginner/intermediate/advanced)
 
-- id (PK)- description
 
-- teacher_id (FK → teachers)- category
 
-- title- level (beginner/intermediate/advanced)
+#### 12. activities- description- price
 
-- description- price
+```sql
 
-- category- duration
+CREATE TABLE activities (- category- duration
 
-- level (beginner/intermediate/advanced)- thumbnail
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
 
-- price- video_url
+    user_id BIGINT NOT NULL,- level (beginner/intermediate/advanced)- thumbnail
 
-- duration- status (active/inactive)
+    type VARCHAR(50) NOT NULL,
 
-- thumbnail- created_at, updated_at
+    description TEXT NOT NULL,- price- video_url
 
-- video_url```
+    metadata JSON NULL,
+
+    ip_address VARCHAR(45) NULL,- duration- status (active/inactive)
+
+    user_agent TEXT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,- thumbnail- created_at, updated_at
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+
+);- video_url```
+
+```
 
 - status (active/inactive)
+
+---
 
 - created_at, updated_at#### 5. **quizzes** (Quiz)
 
-``````sql
-
-- id (PK)
-
-#### 5. **quizzes** (Quizzes)- course_id (FK → courses)
-
-```sql- teacher_id (FK → teachers)
-
-- id (PK)- title
-
-- course_id (FK → courses)- description
-
-- teacher_id (FK → teachers)- duration (minutes)
-
-- title- passing_score
-
-- description- status (active/inactive)
-
-- duration (minutes)- created_at, updated_at
-
-- passing_score```
-
-- status (active/inactive)
-
-- created_at, updated_at#### 6. **quiz_questions** (Questions de Quiz)
+## 🔄 Data Flow Diagrams
 
 ``````sql
 
+### Course Enrollment Flow
+
 - id (PK)
 
-#### 6. **quiz_questions** (Quiz Questions)- quiz_id (FK → quizzes)
+```
 
-```sql- question
+Student                 Frontend                Backend                Database#### 5. **quizzes** (Quizzes)- course_id (FK → courses)
 
-- id (PK)- type (multiple_choice/true_false/short_answer)
+  │                       │                       │                       │
 
-- quiz_id (FK → quizzes)- options (JSON)
+  │──Select Course───────►│                       │                       │```sql- teacher_id (FK → teachers)
+
+  │                       │──API Request─────────►│                       │
+
+  │                       │   POST /enroll        │                       │- id (PK)- title
+
+  │                       │                       │──Check Availability──►│
+
+  │                       │                       │◄──Return Status──────│- course_id (FK → courses)- description
+
+  │                       │                       │──Create Enrollment───►│
+
+  │                       │                       │◄──Return Success─────│- teacher_id (FK → teachers)- duration (minutes)
+
+  │                       │◄──Response───────────│                       │
+
+  │◄──Confirmation───────│                       │                       │- title- passing_score
+
+  │                       │                       │                       │
+
+  │                       │──Send Notification───►│                       │- description- status (active/inactive)
+
+  │◄──Email Notification─┴───────────────────────┴───────────────────────┘
+
+```- duration (minutes)- created_at, updated_at
+
+
+
+### AI Quiz Correction Flow- passing_score```
+
+
+
+```- status (active/inactive)
+
+Student                 Frontend                Backend              Gemini AI
+
+  │                       │                       │                       │- created_at, updated_at#### 6. **quiz_questions** (Questions de Quiz)
+
+  │──Submit Quiz─────────►│                       │                       │
+
+  │                       │──API Request─────────►│                       │``````sql
+
+  │                       │   POST /quiz/submit   │                       │
+
+  │                       │                       │──Prepare Prompt──────►│- id (PK)
+
+  │                       │                       │   (Questions + Answers)
+
+  │                       │                       │                       │#### 6. **quiz_questions** (Quiz Questions)- quiz_id (FK → quizzes)
+
+  │                       │                       │◄──AI Analysis────────│
+
+  │                       │                       │   (Score + Feedback)  │```sql- question
+
+  │                       │                       │                       │
+
+  │                       │                       │──Save Results────────►DB- id (PK)- type (multiple_choice/true_false/short_answer)
+
+  │                       │◄──Response───────────│                       │
+
+  │◄──Show Results───────│   (Score + Feedback)  │                       │- quiz_id (FK → quizzes)- options (JSON)
+
+```
 
 - question- correct_answer
 
+---
+
 - type (multiple_choice/true_false/short_answer)- points
+
+## 🔐 Authentication Flow
 
 - options (JSON)- created_at, updated_at
 
+### Email/Password Authentication
+
 - correct_answer```
 
-- points
+```
 
-- created_at, updated_at#### 7. **quiz_attempts** (Tentatives de Quiz)
+1. User enters email and password- points
 
-``````sql
+2. Frontend sends POST to /api/login
 
-- id (PK)
+3. Backend validates credentials- created_at, updated_at#### 7. **quiz_attempts** (Tentatives de Quiz)
+
+4. Laravel Sanctum creates token
+
+5. Token returned to frontend``````sql
+
+6. Token stored in localStorage
+
+7. Token sent with every API request- id (PK)
+
+```
 
 #### 7. **quiz_attempts** (Quiz Attempts)- student_id (FK → students)
 
+### Google OAuth 2.0 Flow
+
 ```sql- quiz_id (FK → quizzes)
 
-- id (PK)- score
+```
 
-- student_id (FK → students)- answers (JSON)
+1. User clicks "Login with Google"- id (PK)- score
 
-- quiz_id (FK → quizzes)- status (graded/pending)
+2. Redirected to Google OAuth consent screen
 
-- score- started_at
+3. User approves permissions- student_id (FK → students)- answers (JSON)
 
-- answers (JSON)- completed_at
+4. Google redirects with authorization code
+
+5. Backend exchanges code for user data- quiz_id (FK → quizzes)- status (graded/pending)
+
+6. Create/update user in database
+
+7. Generate Sanctum token- score- started_at
+
+8. Return token to frontend
+
+9. Store token and redirect to dashboard- answers (JSON)- completed_at
+
+```
 
 - status (graded/pending)- created_at, updated_at
 
+---
+
 - started_at```
 
-- completed_at
-
-- created_at, updated_at#### 8. **course_student** (Inscriptions Pivot)
-
-``````sql
-
-- id (PK)
-
-#### 8. **course_student** (Enrollment Pivot)- student_id (FK → students)
-
-```sql- course_id (FK → courses)
-
-- id (PK)- enrolled_at
-
-- student_id (FK → students)- payment_status (paid/pending/free)
-
-- course_id (FK → courses)- progress (0-100)
-
-- enrolled_at- completed_at
-
-- payment_status (paid/pending/free)- created_at, updated_at
-
-- progress (0-100)```
+## 🌐 API Endpoints Summary
 
 - completed_at
 
-- created_at, updated_at#### 9. **payments** (Paiements)
+### Authentication
 
-``````sql
+- `POST /api/register` - Register new user- created_at, updated_at#### 8. **course_student** (Inscriptions Pivot)
 
-- id (PK)
+- `POST /api/login` - Email/password login
 
-#### 9. **payments** (Payments)- student_id (FK → students)
+- `POST /api/logout` - Logout user``````sql
 
-```sql- course_id (FK → courses)
+- `GET /api/auth/google` - Google OAuth redirect
 
-- id (PK)- amount
+- `GET /api/auth/google/callback` - Google OAuth callback- id (PK)
 
-- student_id (FK → students)- payment_method
 
-- course_id (FK → courses)- transaction_id
 
-- amount- status (completed/pending/failed)
+### Student Endpoints#### 8. **course_student** (Enrollment Pivot)- student_id (FK → students)
 
-- payment_method- paid_at
+- `GET /api/student/profile` - Get student profile
 
-- transaction_id- created_at, updated_at
+- `PUT /api/student/profile` - Update profile```sql- course_id (FK → courses)
 
-- status (completed/pending/failed)```
+- `GET /api/student/courses` - Get enrolled courses
 
-- paid_at
+- `POST /api/student/enroll` - Enroll in course- id (PK)- enrolled_at
 
-- created_at, updated_at#### 10. **events** (Événements Calendrier)
+- `GET /api/student/quizzes` - Get available quizzes
 
-``````sql
+- `POST /api/student/quiz/submit` - Submit quiz (AI correction)- student_id (FK → students)- payment_status (paid/pending/free)
 
-- id (PK)
 
-#### 10. **events** (Calendar Events)- teacher_id (FK → teachers)
 
-```sql- title
+### Teacher Endpoints- course_id (FK → courses)- progress (0-100)
 
-- id (PK)- description
+- `GET /api/teacher/profile` - Get teacher profile
 
-- teacher_id (FK → teachers)- start_time
+- `GET /api/teacher/courses` - Get created courses- enrolled_at- completed_at
 
-- title- end_time
+- `POST /api/teacher/courses` - Create new course
 
-- description- location
+- `PUT /api/teacher/courses/{id}` - Update course- payment_status (paid/pending/free)- created_at, updated_at
 
-- start_time- type (class/exam/meeting)
+- `DELETE /api/teacher/courses/{id}` - Delete course
 
-- end_time- created_at, updated_at
+- `POST /api/teacher/quizzes` - Create quiz- progress (0-100)```
 
-- location```
+- `POST /api/teacher/quiz/generate` - AI quiz generation
 
-- type (class/exam/meeting)
+- completed_at
 
-- created_at, updated_at#### 11. **student_events** (Événements Étudiants Pivot)
+### Admin Endpoints
 
-``````sql
+- `GET /api/admin/users` - Get all users- created_at, updated_at#### 9. **payments** (Paiements)
 
-- id (PK)
+- `POST /api/admin/users` - Create user
 
-#### 11. **student_events** (Student Events Pivot)- student_id (FK → students)
+- `PUT /api/admin/users/{id}` - Update user``````sql
 
-```sql- event_id (FK → events)
+- `DELETE /api/admin/users/{id}` - Delete user
 
-- id (PK)- status (invited/confirmed/declined)
+- `GET /api/admin/courses` - Get all courses- id (PK)
 
-- student_id (FK → students)- created_at, updated_at
+- `PUT /api/admin/courses/{id}/approve` - Approve course
+
+- `GET /api/admin/analytics` - Get platform analytics#### 9. **payments** (Payments)- student_id (FK → students)
+
+
+
+---```sql- course_id (FK → courses)
+
+
+
+## 📂 Frontend File Structure- id (PK)- amount
+
+
+
+```- student_id (FK → students)- payment_method
+
+frontend/src/
+
+├── components/- course_id (FK → courses)- transaction_id
+
+│   ├── common/
+
+│   │   ├── Navbar.tsx- amount- status (completed/pending/failed)
+
+│   │   ├── Sidebar.tsx
+
+│   │   ├── Footer.tsx- payment_method- paid_at
+
+│   │   └── LoadingSpinner.tsx
+
+│   ├── student/- transaction_id- created_at, updated_at
+
+│   │   ├── StudentSidebar.tsx
+
+│   │   ├── CourseCard.tsx- status (completed/pending/failed)```
+
+│   │   ├── QuizInterface.tsx
+
+│   │   └── Calendar.tsx- paid_at
+
+│   ├── teacher/
+
+│   │   ├── TeacherSidebar.tsx- created_at, updated_at#### 10. **events** (Événements Calendrier)
+
+│   │   ├── CourseCreator.tsx
+
+│   │   ├── QuizCreator.tsx``````sql
+
+│   │   └── AIQuizGenerator.tsx
+
+│   └── admin/- id (PK)
+
+│       ├── AdminSidebar.tsx
+
+│       ├── UserManagement.tsx#### 10. **events** (Calendar Events)- teacher_id (FK → teachers)
+
+│       └── Analytics.tsx
+
+├── pages/```sql- title
+
+│   ├── Home.tsx
+
+│   ├── Login.tsx- id (PK)- description
+
+│   ├── Register.tsx
+
+│   ├── student/- teacher_id (FK → teachers)- start_time
+
+│   │   ├── StudentDashboard.tsx
+
+│   │   ├── StudentProfile.tsx- title- end_time
+
+│   │   └── StudentCourses.tsx
+
+│   ├── teacher/- description- location
+
+│   │   ├── TeacherDashboard.tsx
+
+│   │   ├── TeacherCourses.tsx- start_time- type (class/exam/meeting)
+
+│   │   └── TeacherQuizzes.tsx
+
+│   └── admin/- end_time- created_at, updated_at
+
+│       ├── AdminDashboard.tsx
+
+│       ├── AdminUsers.tsx- location```
+
+│       └── AdminCourses.tsx
+
+├── services/- type (class/exam/meeting)
+
+│   ├── api.ts
+
+│   ├── authService.ts- created_at, updated_at#### 11. **student_events** (Événements Étudiants Pivot)
+
+│   ├── studentService.ts
+
+│   ├── teacherService.ts``````sql
+
+│   └── adminService.ts
+
+├── context/- id (PK)
+
+│   └── AuthContext.tsx
+
+├── types/#### 11. **student_events** (Student Events Pivot)- student_id (FK → students)
+
+│   └── index.ts
+
+├── utils/```sql- event_id (FK → events)
+
+│   ├── formatters.ts
+
+│   └── validators.ts- id (PK)- status (invited/confirmed/declined)
+
+├── App.tsx
+
+└── main.tsx- student_id (FK → students)- created_at, updated_at
+
+```
 
 - event_id (FK → events)```
 
+---
+
 - status (invited/confirmed/declined)
+
+## 📂 Backend File Structure
 
 - created_at, updated_at#### 12. **notifications** (Notifications)
 
-``````sql
-
-- id (PK)
-
-#### 12. **notifications** (Notifications)- user_id (FK → users)
-
-```sql- type (info/warning/success/error)
-
-- id (PK)- title
-
-- user_id (FK → users)- message
-
-- type (info/warning/success/error)- read_at
-
-- title- created_at, updated_at
-
-- message```
-
-- read_at
-
-- created_at, updated_at---
-
 ```
 
-## 🔄 Flux de Données
+backend/``````sql
 
----
+├── app/
 
-### Flux d'Inscription à un Cours
+│   ├── Http/- id (PK)
 
-## 🔄 Data Flow
+│   │   ├── Controllers/
+
+│   │   │   └── Api/#### 12. **notifications** (Notifications)- user_id (FK → users)
+
+│   │   │       ├── AuthController.php
+
+│   │   │       ├── StudentController.php```sql- type (info/warning/success/error)
+
+│   │   │       ├── TeacherController.php
+
+│   │   │       ├── AdminController.php- id (PK)- title
+
+│   │   │       ├── CourseController.php
+
+│   │   │       └── QuizController.php- user_id (FK → users)- message
+
+│   │   ├── Middleware/
+
+│   │   │   ├── Authenticate.php- type (info/warning/success/error)- read_at
+
+│   │   │   ├── RoleMiddleware.php
+
+│   │   │   └── CorsMiddleware.php- title- created_at, updated_at
+
+│   │   └── Requests/
+
+│   │       ├── LoginRequest.php- message```
+
+│   │       ├── RegisterRequest.php
+
+│   │       └── CourseRequest.php- read_at
+
+│   ├── Models/
+
+│   │   ├── User.php- created_at, updated_at---
+
+│   │   ├── Student.php
+
+│   │   ├── Teacher.php```
+
+│   │   ├── Admin.php
+
+│   │   ├── Course.php## 🔄 Flux de Données
+
+│   │   ├── Enrollment.php
+
+│   │   ├── Quiz.php---
+
+│   │   └── QuizAttempt.php
+
+│   └── Services/### Flux d'Inscription à un Cours
+
+│       ├── GeminiService.php
+
+│       ├── AuthService.php## 🔄 Data Flow
+
+│       └── NotificationService.php
+
+├── config/```
+
+│   ├── app.php
+
+│   ├── database.php### Course Enrollment Flow┌──────────┐     1. Sélection     ┌──────────┐
+
+│   ├── cors.php
+
+│   ├── sanctum.php│ Student  │─────────────────────►│  Course  │
+
+│   └── services.php
+
+├── database/```│ Frontend │                       │   List   │
+
+│   ├── migrations/
+
+│   └── seeders/┌──────────┐     1. Selection     ┌──────────┐└──────────┘                       └──────────┘
+
+├── routes/
+
+│   ├── api.php│ Student  │─────────────────────►│  Course  │     │                                   │
+
+│   └── web.php
+
+└── .env│ Frontend │                       │   List   │     │ 2. Click "Enroll"                 │
 
 ```
-
-### Course Enrollment Flow┌──────────┐     1. Sélection     ┌──────────┐
-
-│ Student  │─────────────────────►│  Course  │
-
-```│ Frontend │                       │   List   │
-
-┌──────────┐     1. Selection     ┌──────────┐└──────────┘                       └──────────┘
-
-│ Student  │─────────────────────►│  Course  │     │                                   │
-
-│ Frontend │                       │   List   │     │ 2. Click "Enroll"                 │
 
 └──────────┘                       └──────────┘     ▼                                   ▼
 
+---
+
      │                                   │┌──────────────────────────────────────────┐
+
+## 🚀 Deployment Specifications
 
      │ 2. Click "Enroll"                 ││      POST /api/courses/{id}/enroll       │
 
-     ▼                                   ▼└──────────────────────────────────────────┘
+### Development Environment
 
-┌──────────────────────────────────────────┐     │
+- **Frontend**: Vite Dev Server on `http://localhost:5173`     ▼                                   ▼└──────────────────────────────────────────┘
 
-│      POST /api/courses/{id}/enroll       │     │ 3. Vérification paiement
+- **Backend**: Laravel Artisan on `http://localhost:8000`
+
+- **Database**: MySQL on `localhost:3306`┌──────────────────────────────────────────┐     │
+
+
+
+### Production Requirements│      POST /api/courses/{id}/enroll       │     │ 3. Vérification paiement
+
+
+
+#### Frontend (Vercel/Netlify)└──────────────────────────────────────────┘     ▼
+
+- Node.js 18.x or higher
+
+- Build command: `npm run build`     │┌──────────────────────────────────────────┐
+
+- Output directory: `dist`
+
+- Environment variables: `VITE_API_URL`, `VITE_GOOGLE_CLIENT_ID`     │ 3. Payment verification│   CourseController@enroll (Laravel)      │
+
+
+
+#### Backend (AWS/DigitalOcean)     ▼└──────────────────────────────────────────┘
+
+- PHP 8.2 or higher
+
+- Composer 2.x┌──────────────────────────────────────────┐     │
+
+- MySQL 8.0 or higher
+
+- Laravel optimizations: `php artisan optimize`, `php artisan config:cache`│   CourseController@enroll (Laravel)      │     │ 4. Création enregistrement
+
+- Environment variables: Database credentials, Gemini API key, Google OAuth
 
 └──────────────────────────────────────────┘     ▼
 
-     │┌──────────────────────────────────────────┐
+#### Database
 
-     │ 3. Payment verification│   CourseController@enroll (Laravel)      │
+- MySQL 8.0 with InnoDB engine     │┌──────────────────────────────────────────┐
 
-     ▼└──────────────────────────────────────────┘
+- Regular backups scheduled
 
-┌──────────────────────────────────────────┐     │
+- Indexes on foreign keys and frequently queried columns     │ 4. Create enrollment record│  course_student table (MySQL)            │
 
-│   CourseController@enroll (Laravel)      │     │ 4. Création enregistrement
 
-└──────────────────────────────────────────┘     ▼
 
-     │┌──────────────────────────────────────────┐
+---     ▼│  - student_id                            │
 
-     │ 4. Create enrollment record│  course_student table (MySQL)            │
 
-     ▼│  - student_id                            │
 
-┌──────────────────────────────────────────┐│  - course_id                             │
+## 🔧 Key Technologies Integration┌──────────────────────────────────────────┐│  - course_id                             │
 
-│  course_student table (MySQL)            ││  - payment_status: 'paid'                │
+
+
+### Google Gemini AI Integration│  course_student table (MySQL)            ││  - payment_status: 'paid'                │
+
+**File**: `backend/app/Services/GeminiService.php`
 
 │  - student_id                            │└──────────────────────────────────────────┘
 
-│  - course_id                             │     │
+**Features**:
 
-│  - payment_status: 'paid'                │     │ 5. Notification
+- Quiz auto-correction│  - course_id                             │     │
+
+- Quiz generation from course topics
+
+- Intelligent feedback generation│  - payment_status: 'paid'                │     │ 5. Notification
+
+- Error handling and retry logic
 
 └──────────────────────────────────────────┘     ▼
 
-     │┌──────────────────────────────────────────┐
+### Laravel Sanctum Authentication
 
-     │ 5. Send notification│  notifications table                     │
+**Configuration**: `config/sanctum.php`     │┌──────────────────────────────────────────┐
 
-     ▼│  "Vous êtes inscrit au cours X"         │
 
-┌──────────────────────────────────────────┐└──────────────────────────────────────────┘
 
-│  notifications table                     │```
+**Features**:     │ 5. Send notification│  notifications table                     │
+
+- Stateless API authentication
+
+- Token management     ▼│  "Vous êtes inscrit au cours X"         │
+
+- CORS configuration
+
+- Middleware protection┌──────────────────────────────────────────┐└──────────────────────────────────────────┘
+
+
+
+### React Router Integration│  notifications table                     │```
+
+**File**: `frontend/src/App.tsx`
 
 │  "You are enrolled in course X"          │
 
-└──────────────────────────────────────────┘---
+**Routes**:
 
-```
+- Public routes: `/`, `/login`, `/register`└──────────────────────────────────────────┘---
 
-### Flux de Correction de Quiz par AI
+- Protected routes: `/student/*`, `/teacher/*`, `/admin/*`
 
----
+- Role-based route guards```
 
-```
 
-### AI Quiz Correction Flow┌──────────┐     1. Soumet Quiz    ┌──────────┐
 
-│ Student  │─────────────────────►│   Quiz   │
+---### Flux de Correction de Quiz par AI
 
-```│          │                       │  Answers │
 
-┌──────────┐     1. Submit Quiz    ┌──────────┐└──────────┘                       └──────────┘
 
-│ Student  │─────────────────────►│   Quiz   │     │                                   │
+## 📊 Performance Optimization---
 
-│          │                       │  Answers │     │ 2. POST /api/quiz/submit          │
 
-└──────────┘                       └──────────┘     ▼                                   ▼
 
-     │                                   │┌──────────────────────────────────────────┐
+### Frontend```
 
-     │ 2. POST /api/quiz/submit          ││    QuizController@submit (Laravel)       │
+- Code splitting with React.lazy()
 
-     ▼                                   ▼└──────────────────────────────────────────┘
+- Image optimization### AI Quiz Correction Flow┌──────────┐     1. Soumet Quiz    ┌──────────┐
 
-┌──────────────────────────────────────────┐     │
+- Tailwind CSS purging
 
-│    QuizController@submit (Laravel)       │     │ 3. Envoi à Gemini AI
+- Vite build optimization│ Student  │─────────────────────►│   Quiz   │
 
-└──────────────────────────────────────────┘     ▼
 
-     │┌──────────────────────────────────────────┐
 
-     │ 3. Send to Gemini AI│       Google Gemini API                  │
+### Backend```│          │                       │  Answers │
+
+- Eloquent query optimization
+
+- Database indexing┌──────────┐     1. Submit Quiz    ┌──────────┐└──────────┘                       └──────────┘
+
+- Response caching
+
+- API rate limiting│ Student  │─────────────────────►│   Quiz   │     │                                   │
+
+
+
+### Database│          │                       │  Answers │     │ 2. POST /api/quiz/submit          │
+
+- Proper indexing on foreign keys
+
+- Query optimization└──────────┘                       └──────────┘     ▼                                   ▼
+
+- Connection pooling
+
+- Regular maintenance     │                                   │┌──────────────────────────────────────────┐
+
+
+
+---     │ 2. POST /api/quiz/submit          ││    QuizController@submit (Laravel)       │
+
+
+
+## 🔒 Security Measures     ▼                                   ▼└──────────────────────────────────────────┘
+
+
+
+1. **Authentication**: Laravel Sanctum + Google OAuth 2.0┌──────────────────────────────────────────┐     │
+
+2. **Authorization**: Role-based access control
+
+3. **Data Validation**: Laravel Form Requests│    QuizController@submit (Laravel)       │     │ 3. Envoi à Gemini AI
+
+4. **SQL Injection Prevention**: Eloquent ORM
+
+5. **XSS Protection**: Input sanitization└──────────────────────────────────────────┘     ▼
+
+6. **CSRF Protection**: Laravel middleware
+
+7. **HTTPS**: SSL/TLS encryption     │┌──────────────────────────────────────────┐
+
+8. **Environment Variables**: Secure credential storage
+
+9. **Rate Limiting**: API throttling     │ 3. Send to Gemini AI│       Google Gemini API                  │
+
+10. **Password Hashing**: bcrypt algorithm
 
      ▼│   - Analyse des réponses                 │
 
+---
+
 ┌──────────────────────────────────────────┐│   - Génération du score                  │
+
+## 📈 Scalability Considerations
 
 │       Google Gemini API                  ││   - Feedback personnalisé                │
 
-│   - Analyze answers                      │└──────────────────────────────────────────┘
+### Horizontal Scaling
 
-│   - Generate score                       │     │
+- Load balancing for backend servers│   - Analyze answers                      │└──────────────────────────────────────────┘
+
+- Database replication (master-slave)
+
+- CDN for static assets│   - Generate score                       │     │
+
+- Redis for caching and sessions
 
 │   - Personalized feedback                │     │ 4. Sauvegarde résultats
 
-└──────────────────────────────────────────┘     ▼
+### Vertical Scaling
 
-     │┌──────────────────────────────────────────┐
+- Optimize database queries└──────────────────────────────────────────┘     ▼
+
+- Implement caching strategies
+
+- Use queue workers for heavy tasks     │┌──────────────────────────────────────────┐
+
+- Monitor and optimize resource usage
 
      │ 4. Save results│   quiz_attempts table                    │
 
+---
+
      ▼│   - score calculé                        │
+
+## 🎯 Future Enhancements
 
 ┌──────────────────────────────────────────┐│   - status: 'graded'                     │
 
-│   quiz_attempts table                    ││   - answers avec feedback AI             │
+- [ ] Video streaming integration
 
-│   - calculated score                     │└──────────────────────────────────────────┘
+- [ ] Live chat between students and teachers│   quiz_attempts table                    ││   - answers avec feedback AI             │
 
-│   - status: 'graded'                     │     │
+- [ ] Mobile application (React Native)
 
-│   - answers with AI feedback             │     │ 5. Notification résultat
+- [ ] Advanced analytics and reporting│   - calculated score                     │└──────────────────────────────────────────┘
 
-└──────────────────────────────────────────┘     ▼
+- [ ] Gamification features
 
-     │┌──────────────────────────────────────────┐
+- [ ] Multi-language support│   - status: 'graded'                     │     │
 
-     │ 5. Result notification│  Student Dashboard                       │
+- [ ] Payment gateway integration
+
+- [ ] Certificate blockchain verification│   - answers with AI feedback             │     │ 5. Notification résultat
+
+
+
+---└──────────────────────────────────────────┘     ▼
+
+
+
+<div align="center">     │┌──────────────────────────────────────────┐
+
+  <p><strong>CoursFlow Architecture v1.0</strong></p>
+
+  <p>Last Updated: November 2024</p>     │ 5. Result notification│  Student Dashboard                       │
+
+</div>
 
      ▼│  Score affiché + Feedback AI             │
 
