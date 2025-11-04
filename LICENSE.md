@@ -2,7 +2,7 @@
 
 ## CoursFlow - Learning Management System
 
-**Copyright (c) 2024 Mohammed ES**
+**Copyright (c) 2025 Mohammed ES**
 
 ---
 
@@ -156,7 +156,7 @@ For questions or clarifications about the MIT License for CoursFlow:
 ```
 MIT License
 
-Copyright (c) 2024 Mohammed ES
+Copyright (c) 2025 Mohammed ES
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -181,7 +181,7 @@ SOFTWARE.
 
 <div align="center">
 
-**CoursFlow** • Licensed under MIT • Copyright (c) 2024 Mohammed ES
+**CoursFlow** • Licensed under MIT • Copyright (c) 2025 Mohammed ES
 
 [⬆ Back to README](./README.md)
 
