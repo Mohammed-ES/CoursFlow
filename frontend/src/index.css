@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth scrolling for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #4F46E5 0%, #06B6D4 100%);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4338CA 0%, #0891B2 100%);
+}
+
+@layer base {
+  body {
+    @apply font-sans text-secondary-main bg-neutral-offWhite;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-main text-white px-8 py-3.5 rounded-button font-semibold shadow-lg hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-300;
+  }
+  
+  .btn-secondary {
+    @apply bg-transparent text-primary-main px-8 py-3.5 rounded-button font-semibold border-2 border-neutral-lightGray hover:border-primary-main hover:bg-primary-main/5 transition-all duration-300;
+  }
+  
+  .card {
+    @apply bg-white rounded-card p-8 shadow-card hover:shadow-card-hover transition-all duration-300;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3.5 border border-neutral-lightGray rounded-lg focus:outline-none focus:ring-4 focus:ring-primary-main/10 focus:border-primary-main transition-all duration-200;
+  }
+  
+  .container-custom {
+    @apply max-w-7xl mx-auto px-6;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-main to-primary-light bg-clip-text text-transparent;
+  }
+  
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, #5175FF 0%, #6B8AFF 100%);
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+  }
+}
+
+/* Dark mode styles */
+.dark body {
+  @apply bg-secondary-main text-white;
+}
+
+.dark .card {
+  @apply bg-secondary-light shadow-lg;
+}
+
+.dark .input-field {
+  @apply bg-secondary-light border-secondary-main text-white;
+}

@@ -1,0 +1,188 @@
+# CoursFlow - Fichiers à ignorer sur GitHub
+
+# ==========================================
+# Environnement et Configuration
+# ==========================================
+.env
+.env.backup
+.env.local
+.env.production
+.env.*.php
+.env.php
+
+# ==========================================
+# Node.js et NPM (Frontend)
+# ==========================================
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.npm
+.yarn
+package-lock.json
+yarn.lock
+
+# ==========================================
+# Laravel et PHP (Backend)
+# ==========================================
+/backend/vendor/
+/backend/.env
+/backend/.env.backup
+/backend/storage/*.key
+/backend/storage/logs/*
+!/backend/storage/logs/.gitkeep
+/backend/storage/framework/cache/*
+!/backend/storage/framework/cache/.gitkeep
+/backend/storage/framework/sessions/*
+!/backend/storage/framework/sessions/.gitkeep
+/backend/storage/framework/views/*
+!/backend/storage/framework/views/.gitkeep
+/backend/bootstrap/cache/*
+!/backend/bootstrap/cache/.gitkeep
+/backend/public/storage
+/backend/public/hot
+
+# ==========================================
+# Composer
+# ==========================================
+composer.phar
+composer.lock
+
+# ==========================================
+# Fichiers de Test et Debug
+# ==========================================
+test-*.php
+check-*.php
+verify-*.php
+debug-*.php
+fix-*.php
+create-*.php
+*.test.js
+*.spec.js
+__tests__/
+
+# ==========================================
+# Scripts d'Installation et Maintenance
+# ==========================================
+*.bat
+*.sh
+*.ps1
+install-*.php
+setup-*.php
+
+# ==========================================
+# Documentation Temporaire
+# ==========================================
+*.md
+!README.md
+!LICENSE.md
+!CONTRIBUTING.md
+
+# ==========================================
+# Dossiers de Backup
+# ==========================================
+*_backup/
+backup/
+backups/
+
+# ==========================================
+# Fichiers Système
+# ==========================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================================
+# IDE et Éditeurs
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ==========================================
+# Logs
+# ==========================================
+*.log
+logs/
+*.log.*
+
+# ==========================================
+# Fichiers Temporaires
+# ==========================================
+*.tmp
+*.temp
+*.cache
+.cache/
+
+# ==========================================
+# Uploads et Médias (si volumineux)
+# ==========================================
+# Décommentez si vos uploads sont trop volumineux
+# /backend/storage/app/public/profiles/*
+# /backend/storage/app/public/courses/*
+# /image/*
+
+# ==========================================
+# Base de Données
+# ==========================================
+*.sql
+*.sqlite
+*.db
+database/*.sqlite
+
+# ==========================================
+# Fichiers de Credentials
+# ==========================================
+*.pem
+*.key
+*.crt
+# ============================================
+# COURSFLOW - GITIGNORE
+# Protection des fichiers sensibles
+# ============================================
+
+# ============================================
+# 1. ENVIRONNEMENT - FICHIERS SENSIBLES ⚠️ NE JAMAIS COMMITER
+# ============================================
+.env
+.env.backup
+.env.production
+.env.local
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Clés API et credentials - SENSIBLE! ⚠️
+backend/.env.API.KEY
+backend/.env.google.example
+**/credentials.json
+**/client_secret.json
+**/*_credentials.json
+**/*_secrets.json
+
+# Fichiers de configuration personnels
+config/local.php
+config/production.php
+*.credentials
+
+# ==========================================
+# Build et Distribution
+# ==========================================
+/frontend/dist/
+/frontend/build/
+*.map
+
+# ==========================================
+# Autres
+# ==========================================
+*.bak
+*.orig

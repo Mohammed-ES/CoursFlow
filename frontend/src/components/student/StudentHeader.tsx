@@ -1,0 +1,217 @@
+import { useState, useEffect, useRef } from 'react';
+import { Bell, Search, Moon, Sun, User, ChevronDown, LogOut } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import studentAPI from '../../services/studentAPI';
+
+interface StudentHeaderProps {
+  title: string;
+  subtitle?: string;
+}
+
+const StudentHeader = ({ title, subtitle }: StudentHeaderProps) => {
+  const { isDarkMode, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  
+  const profileRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchUnreadCount();
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await studentAPI.getUnreadNotificationCount();
+      setUnreadCount(response.data.unread_count);
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  return (
+    <header className="bg-white dark:bg-secondary-main shadow-md sticky top-0 z-40 border-b border-neutral-lightGray/20 dark:border-secondary-light/20">
+      <div className="px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Title Section */}
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-neutral-darkGray dark:text-neutral-lightGray">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="text-sm text-neutral-gray dark:text-neutral-lightGray/70 mt-1">
+                {subtitle}
+              </p>
+            )}
+          </div>
+
+          {/* Actions Section */}
+          <div className="flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <motion.button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg hover:bg-neutral-lightGray/30 dark:hover:bg-secondary-light/20 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isDarkMode ? (
+                <Sun className="w-5 h-5 text-warning-main" />
+              ) : (
+                <Moon className="w-5 h-5 text-primary-main" />
+              )}
+            </motion.button>
+
+            {/* Notifications */}
+            <div className="relative" ref={notifRef}>
+              <motion.button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="p-2 rounded-lg hover:bg-neutral-lightGray/30 dark:hover:bg-secondary-light/20 transition-colors relative"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Bell className="w-5 h-5 text-neutral-darkGray dark:text-neutral-lightGray" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full shadow-lg">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </motion.button>
+
+              {/* Notifications Dropdown */}
+              {showNotifications && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-2 w-80 bg-white dark:bg-secondary-main rounded-lg shadow-xl border border-neutral-lightGray/20 dark:border-secondary-light/20 overflow-hidden"
+                >
+                  {/* Header */}
+                  <div className="px-4 py-3 border-b border-neutral-lightGray/20 dark:border-secondary-light/20">
+                    <h3 className="text-sm font-semibold text-neutral-darkGray dark:text-neutral-lightGray">
+                      Notifications
+                    </h3>
+                  </div>
+
+                  {/* Notification List */}
+                  <div className="max-h-96 overflow-y-auto">
+                    {unreadCount === 0 ? (
+                      <div className="p-8 text-center">
+                        <p className="text-sm text-neutral-gray dark:text-neutral-lightGray/70">
+                          No new notifications
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="p-4 hover:bg-neutral-lightGray/10 dark:hover:bg-secondary-light/10 transition-colors cursor-pointer border-b border-neutral-lightGray/10 dark:border-secondary-light/10">
+                          <p className="text-sm text-neutral-darkGray dark:text-neutral-lightGray font-medium">
+                            You have {unreadCount} unread notification{unreadCount > 1 ? 's' : ''}
+                          </p>
+                          <p className="text-xs text-neutral-gray dark:text-neutral-lightGray/70 mt-1">
+                            Click to view all notifications
+                          </p>
+                        </div>
+                        <Link
+                          to="/student/notifications"
+                          onClick={() => setShowNotifications(false)}
+                          className="block p-3 text-center text-sm text-primary-main dark:text-primary-light hover:bg-primary-light/10 dark:hover:bg-secondary-light/10 transition-colors font-medium"
+                        >
+                          View All Notifications
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Profile Menu */}
+            <div className="relative" ref={profileRef}>
+              <motion.button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-neutral-lightGray/30 dark:hover:bg-secondary-light/20 transition-colors"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-main to-secondary-main flex items-center justify-center text-white font-bold text-sm">
+                  {user?.name?.charAt(0).toUpperCase() || 'S'}
+                </div>
+                <div className="hidden md:block text-left">
+                  <p className="text-sm font-semibold text-neutral-darkGray dark:text-neutral-lightGray">
+                    {user?.name || 'Student'}
+                  </p>
+                  <p className="text-xs text-neutral-gray dark:text-neutral-lightGray/70">
+                    Student Account
+                  </p>
+                </div>
+                <ChevronDown className="w-4 h-4 text-neutral-darkGray dark:text-neutral-lightGray hidden md:block" />
+              </motion.button>
+
+              {/* Profile Dropdown */}
+              {showProfileMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-2 w-56 bg-white dark:bg-secondary-main rounded-lg shadow-xl border border-neutral-lightGray/20 dark:border-secondary-light/20 overflow-hidden"
+                >
+                  {/* Profile Info is removed */}
+
+                  {/* Menu Items */}
+                  <div className="py-2">
+                    <Link
+                      to="/student/profile"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="w-full px-4 py-2 text-left hover:bg-neutral-lightGray/10 dark:hover:bg-secondary-light/10 transition-colors flex items-center space-x-3 text-neutral-darkGray dark:text-neutral-lightGray"
+                    >
+                      <User className="w-4 h-4" />
+                      <span className="text-sm">My Profile</span>
+                    </Link>
+                    
+                    <div className="border-t border-neutral-lightGray/20 dark:border-secondary-light/20 my-2"></div>
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-4 py-2 text-left hover:bg-error-light/10 transition-colors flex items-center space-x-3 text-error-main"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="text-sm">Logout</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default StudentHeader;

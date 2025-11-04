@@ -1,0 +1,1185 @@
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import {
+  Bell,
+  Eye,
+  X,
+  AlertCircle,
+  Info,
+  CheckCircle2,
+  AlertTriangle,
+  Calendar,
+  Inbox,
+  GraduationCap,
+} from 'lucide-react';
+import StudentLayout from '../../components/layout/StudentLayout';
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:8000/api';
+
+interface AdminNotification {
+  id: number;
+  title: string;
+  content: string;
+  type: 'announcement' | 'alert' | 'info' | 'update' | 'reminder';
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  target_audience: 'all_teachers' | 'all_students' | 'both';
+  is_published: boolean;
+  published_at?: string;
+  expires_at?: string;
+  is_active: boolean;
+  is_read: boolean;
+  read_at?: string;
+  admin?: {
+    id: number;
+    name: string;
+  };
+  created_at: string;
+}
+
+interface TeacherNotification {
+  id: number;
+  title: string;
+  content: string;
+  type: 'announcement' | 'reminder' | 'alert' | 'info';
+  priority: 'low' | 'normal' | 'medium' | 'high' | 'urgent';
+  course_id?: number;
+  course?: {
+    id: number;
+    title: string;
+  };
+  published: boolean;
+  teacher?: {
+    id: number;
+    name: string;
+  };
+  available_from?: string;
+  available_until?: string;
+  created_at: string;
+  is_read: boolean;
+  read_at?: string;
+}
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+};
+
+const StudentNotifications = () => {
+  const [activeTab, setActiveTab] = useState<'admin' | 'teachers'>('admin');
+  const [adminNotifications, setAdminNotifications] = useState<AdminNotification[]>([]);
+  const [teacherNotifications, setTeacherNotifications] = useState<TeacherNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedAdminNotif, setSelectedAdminNotif] = useState<AdminNotification | null>(null);
+  const [selectedTeacherNotif, setSelectedTeacherNotif] = useState<TeacherNotification | null>(null);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [activeTab]);
+
+  const fetchNotifications = async () => {
+    setLoading(true);
+    try {
+      if (activeTab === 'admin') {
+        const response = await axios.get(`${API_BASE_URL}/student/admin-notifications`, {
+          headers: getAuthHeaders(),
+        });
+        setAdminNotifications(response.data.data || []);
+      } else {
+        const response = await axios.get(`${API_BASE_URL}/student/teacher-notifications`, {
+          headers: getAuthHeaders(),
+        });
+        setTeacherNotifications(response.data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewAdminNotification = async (notification: AdminNotification) => {
+    setSelectedAdminNotif(notification);
+    setShowViewModal(true);
+
+    // Mark as read if not already read
+    if (!notification.is_read) {
+      try {
+        await axios.post(
+          `${API_BASE_URL}/student/admin-notifications/${notification.id}/mark-read`,
+          {},
+          { headers: getAuthHeaders() }
+        );
+        fetchNotifications();
+        // Notify header to update badge
+        window.dispatchEvent(new Event('notificationUpdated'));
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
+    }
+  };
+
+  const handleViewTeacherNotification = async (notification: TeacherNotification) => {
+    setSelectedTeacherNotif(notification);
+    setShowViewModal(true);
+
+    // Mark as read if not already read
+    if (!notification.is_read) {
+      try {
+        await axios.post(
+          `${API_BASE_URL}/student/teacher-notifications/${notification.id}/mark-read`,
+          {},
+          { headers: getAuthHeaders() }
+        );
+        fetchNotifications();
+        // Notify header to update badge
+        window.dispatchEvent(new Event('notificationUpdated'));
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'info':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'success':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      case 'warning':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+      case 'alert':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+      case 'announcement':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+      case 'update':
+        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300';
+      case 'reminder':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'urgent':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+      case 'high':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
+      case 'medium':
+      case 'normal':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+      case 'low':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'info':
+        return <Info className="w-5 h-5" />;
+      case 'success':
+        return <CheckCircle2 className="w-5 h-5" />;
+      case 'warning':
+        return <AlertTriangle className="w-5 h-5" />;
+      case 'alert':
+        return <AlertCircle className="w-5 h-5" />;
+      case 'announcement':
+        return <Bell className="w-5 h-5" />;
+      case 'update':
+        return <Info className="w-5 h-5" />;
+      case 'reminder':
+        return <Calendar className="w-5 h-5" />;
+      default:
+        return <Bell className="w-5 h-5" />;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const unreadAdminCount = adminNotifications.filter((n) => !n.is_read).length;
+  const unreadTeacherCount = teacherNotifications.filter((n) => !n.is_read).length;
+
+  return (
+    <StudentLayout>
+      <div className="p-6 max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center space-x-3 mb-2">
+            <Bell className="w-8 h-8 text-primary-main" />
+            <h1 className="text-3xl font-bold text-secondary-main dark:text-white">
+              Notifications
+            </h1>
+          </div>
+          <p className="text-neutral-gray">
+            View notifications from administrators and your teachers
+          </p>
+        </div>
+
+        {/* Tabs */}
+        <div className="mb-6">
+          <div className="flex space-x-2 border-b border-neutral-light dark:border-neutral-dark">
+            <button
+              onClick={() => setActiveTab('admin')}
+              className={`px-6 py-3 font-medium transition-colors relative ${
+                activeTab === 'admin'
+                  ? 'text-primary-main'
+                  : 'text-neutral-gray hover:text-secondary-main dark:hover:text-white'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Inbox className="w-5 h-5" />
+                <span>From Admin</span>
+                {unreadAdminCount > 0 && (
+                  <span className="ml-2 px-2 py-0.5 text-xs bg-primary-main text-white rounded-full">
+                    {unreadAdminCount}
+                  </span>
+                )}
+              </div>
+              {activeTab === 'admin' && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-main"
+                  initial={false}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('teachers')}
+              className={`px-6 py-3 font-medium transition-colors relative ${
+                activeTab === 'teachers'
+                  ? 'text-primary-main'
+                  : 'text-neutral-gray hover:text-secondary-main dark:hover:text-white'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <GraduationCap className="w-5 h-5" />
+                <span>From Teachers</span>
+                {unreadTeacherCount > 0 && (
+                  <span className="ml-2 px-2 py-0.5 text-xs bg-primary-main text-white rounded-full">
+                    {unreadTeacherCount}
+                  </span>
+                )}
+              </div>
+              {activeTab === 'teachers' && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-main"
+                  initial={false}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Notifications List */}
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-main"></div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Admin Notifications Tab */}
+            {activeTab === 'admin' && (
+              <>
+                {adminNotifications.length === 0 ? (
+                  <div className="text-center py-12 bg-white dark:bg-secondary-dark rounded-lg">
+                    <Inbox className="w-16 h-16 text-neutral-gray mx-auto mb-4" />
+                    <p className="text-neutral-gray">No admin notifications</p>
+                  </div>
+                ) : (
+                  adminNotifications.map((notification) => (
+                    <motion.div
+                      key={notification.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`bg-white dark:bg-secondary-dark rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow ${
+                        !notification.is_read ? 'border-l-4 border-primary-main' : ''
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <div className={`p-2 rounded-lg ${getTypeColor(notification.type)}`}>
+                              {getTypeIcon(notification.type)}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg text-secondary-main dark:text-white">
+                                {notification.title}
+                              </h3>
+                              <p className="text-sm text-neutral-gray">
+                                From Admin • {formatDate(notification.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2 mb-3">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}>
+                              {notification.type}
+                            </span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(notification.priority)}`}>
+                              {notification.priority}
+                            </span>
+                            {!notification.is_read && (
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                New
+                              </span>
+                            )}
+                          </div>
+                          <div
+                            className="text-neutral-gray text-sm line-clamp-2"
+                            dangerouslySetInnerHTML={{ __html: notification.content }}
+                          />
+                        </div>
+
+                        {/* Actions */}
+                        <div className="ml-4">
+                          <button
+                            onClick={() => handleViewAdminNotification(notification)}
+                            className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                            title="View"
+                          >
+                            <Eye className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </>
+            )}
+
+            {/* Teacher Notifications Tab */}
+            {activeTab === 'teachers' && (
+              <>
+                {teacherNotifications.length === 0 ? (
+                  <div className="text-center py-12 bg-white dark:bg-secondary-dark rounded-lg">
+                    <GraduationCap className="w-16 h-16 text-neutral-gray mx-auto mb-4" />
+                    <p className="text-neutral-gray">No teacher notifications</p>
+                  </div>
+                ) : (
+                  teacherNotifications.map((notification) => (
+                    <motion.div
+                      key={notification.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`bg-white dark:bg-secondary-dark rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow ${
+                        !notification.is_read ? 'border-l-4 border-primary-main' : ''
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <div className={`p-2 rounded-lg ${getTypeColor(notification.type)}`}>
+                              {getTypeIcon(notification.type)}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg text-secondary-main dark:text-white">
+                                {notification.title}
+                              </h3>
+                              <p className="text-sm text-neutral-gray">
+                                {notification.teacher?.name} • {notification.course?.title} • {formatDate(notification.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2 mb-3">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}>
+                              {notification.type}
+                            </span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(notification.priority)}`}>
+                              {notification.priority}
+                            </span>
+                            {!notification.is_read && (
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                New
+                              </span>
+                            )}
+                          </div>
+                          <div
+                            className="text-neutral-gray text-sm line-clamp-2"
+                            dangerouslySetInnerHTML={{ __html: notification.content }}
+                          />
+                        </div>
+
+                        {/* Actions */}
+                        <div className="ml-4">
+                          <button
+                            onClick={() => handleViewTeacherNotification(notification)}
+                            className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                            title="View"
+                          >
+                            <Eye className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* View Modal for Admin Notifications */}
+      {showViewModal && selectedAdminNotif && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-secondary-dark rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+          >
+            <div className="p-6 border-b border-neutral-light dark:border-neutral-dark">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-3 rounded-lg ${getTypeColor(selectedAdminNotif.type)}`}>
+                    {getTypeIcon(selectedAdminNotif.type)}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-secondary-main dark:text-white">
+                      {selectedAdminNotif.title}
+                    </h2>
+                    <p className="text-sm text-neutral-gray">
+                      From Admin • {formatDate(selectedAdminNotif.created_at)}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowViewModal(false);
+                    setSelectedAdminNotif(null);
+                  }}
+                  className="p-2 hover:bg-neutral-light dark:hover:bg-neutral-dark rounded-lg transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="flex items-center space-x-2 mb-6">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTypeColor(selectedAdminNotif.type)}`}>
+                  {selectedAdminNotif.type}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(selectedAdminNotif.priority)}`}>
+                  {selectedAdminNotif.priority}
+                </span>
+              </div>
+
+              <div
+                className="prose dark:prose-invert max-w-none mb-6"
+                dangerouslySetInnerHTML={{ __html: selectedAdminNotif.content }}
+              />
+
+              <div className="grid grid-cols-2 gap-4 p-4 bg-neutral-light dark:bg-neutral-dark rounded-lg">
+                <div>
+                  <p className="text-sm text-neutral-gray mb-1">Published</p>
+                  <p className="font-semibold text-secondary-main dark:text-white">
+                    {selectedAdminNotif.published_at ? formatDate(selectedAdminNotif.published_at) : 'N/A'}
+                  </p>
+                </div>
+                {selectedAdminNotif.expires_at && (
+                  <div>
+                    <p className="text-sm text-neutral-gray mb-1">Expires</p>
+                    <p className="font-semibold text-secondary-main dark:text-white">
+                      {formatDate(selectedAdminNotif.expires_at)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* View Modal for Teacher Notifications */}
+      {showViewModal && selectedTeacherNotif && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-secondary-dark rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+          >
+            <div className="p-6 border-b border-neutral-light dark:border-neutral-dark">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-3 rounded-lg ${getTypeColor(selectedTeacherNotif.type)}`}>
+                    {getTypeIcon(selectedTeacherNotif.type)}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-secondary-main dark:text-white">
+                      {selectedTeacherNotif.title}
+                    </h2>
+                    <p className="text-sm text-neutral-gray">
+                      {selectedTeacherNotif.teacher?.name} • {selectedTeacherNotif.course?.title} • {formatDate(selectedTeacherNotif.created_at)}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowViewModal(false);
+                    setSelectedTeacherNotif(null);
+                  }}
+                  className="p-2 hover:bg-neutral-light dark:hover:bg-neutral-dark rounded-lg transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="flex items-center space-x-2 mb-6">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTypeColor(selectedTeacherNotif.type)}`}>
+                  {selectedTeacherNotif.type}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(selectedTeacherNotif.priority)}`}>
+                  {selectedTeacherNotif.priority}
+                </span>
+              </div>
+
+              <div
+                className="prose dark:prose-invert max-w-none mb-6"
+                dangerouslySetInnerHTML={{ __html: selectedTeacherNotif.content }}
+              />
+
+              <div className="grid grid-cols-2 gap-4 p-4 bg-neutral-light dark:bg-neutral-dark rounded-lg">
+                {selectedTeacherNotif.available_from && (
+                  <div>
+                    <p className="text-sm text-neutral-gray mb-1">Available From</p>
+                    <p className="font-semibold text-secondary-main dark:text-white">
+                      {formatDate(selectedTeacherNotif.available_from)}
+                    </p>
+                  </div>
+                )}
+                {selectedTeacherNotif.available_until && (
+                  <div>
+                    <p className="text-sm text-neutral-gray mb-1">Available Until</p>
+                    <p className="font-semibold text-secondary-main dark:text-white">
+                      {formatDate(selectedTeacherNotif.available_until)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </StudentLayout>
+  );
+};
+
+export default StudentNotifications;
+import {
+  Bell,
+  Trash2,
+  Search,
+  Mail,
+  BookOpen,
+  AlertCircle,
+  Calendar,
+  CheckCircle2,
+  X,
+  Info,
+  Eye,
+} from 'lucide-react';
+import StudentLayout from '../../components/layout/StudentLayout';
+import studentAPI, { Notification } from '../../services/studentAPI';
+import { ToastContainer } from '../../components/common/Toast';
+import { useToast } from '../../hooks/useToast';
+
+const Notifications = () => {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filterPriority, setFilterPriority] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const { toasts, removeToast, success, error: showError } = useToast();
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await studentAPI.getNotifications();
+      // L'API retourne { success: true, data: [...] }
+      const notifData = Array.isArray(response.data) ? response.data : response.data?.data || [];
+      setNotifications(notifData);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+      setNotifications([]);
+      showError('Échec du chargement des notifications');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const markAsRead = async (id: number) => {
+    try {
+      await studentAPI.markNotificationAsRead(id);
+      setNotifications((prev) =>
+        prev.map((notif) => (notif.id === id ? { ...notif, read_at: new Date().toISOString() } : notif))
+      );
+      success('Notification marked as read');
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+      showError('Failed to update');
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const unreadIds = notifications.filter((n) => !n.read_at).map((n) => n.id);
+      if (unreadIds.length === 0) {
+        showError('No unread notifications');
+        return;
+      }
+      
+      await Promise.all(unreadIds.map((id) => studentAPI.markNotificationAsRead(id)));
+      setNotifications((prev) =>
+        prev.map((notif) => ({ ...notif, read_at: new Date().toISOString() }))
+      );
+      success(`${unreadIds.length} notifications marked as read`);
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+      showError('Failed to update');
+    }
+  };
+
+  const deleteNotification = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this notification?')) return;
+
+    try {
+      await studentAPI.deleteNotification(id);
+      setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+      success('Notification deleted');
+      if (showViewModal) {
+        setShowViewModal(false);
+        setSelectedNotification(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+      showError('Failed to delete');
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'announcement':
+        return <Bell className="w-5 h-5" />;
+      case 'reminder':
+        return <Calendar className="w-5 h-5" />;
+      case 'alert':
+        return <AlertCircle className="w-5 h-5" />;
+      case 'info':
+        return <Info className="w-5 h-5" />;
+      default:
+        return <Mail className="w-5 h-5" />;
+    }
+  };
+
+  const getTypeBadgeColor = (type: string) => {
+    switch (type) {
+      case 'info':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'announcement':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'reminder':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'alert':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+  };
+
+  const getPriorityBadgeColor = (priority: string) => {
+    switch (priority) {
+      case 'urgent':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'high':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'normal':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'low':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+  };
+
+  const filteredNotifications = notifications.filter((notification) => {
+    const matchesSearch =
+      notification.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      notification.message.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesType = filterType === 'all' || notification.type === filterType;
+    const matchesPriority = filterPriority === 'all' || notification.priority === filterPriority;
+    const matchesStatus = 
+      filterStatus === 'all' ||
+      (filterStatus === 'unread' && !notification.read_at) ||
+      (filterStatus === 'read' && notification.read_at);
+    
+    return matchesSearch && matchesType && matchesPriority && matchesStatus;
+  });
+
+  const unreadCount = notifications.filter((n) => !n.read_at).length;
+
+  const openViewModal = (notification: Notification) => {
+    setSelectedNotification(notification);
+    setShowViewModal(true);
+    if (!notification.read_at) {
+      markAsRead(notification.id);
+    }
+  };
+
+  const closeViewModal = () => {
+    setShowViewModal(false);
+    setSelectedNotification(null);
+  };
+
+  if (loading) {
+    return (
+      <StudentLayout title="Notifications" subtitle="Restez informé de toutes les actualités">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </StudentLayout>
+    );
+  }
+
+  return (
+    <StudentLayout title="Notifications" subtitle="Stay informed about all updates">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      
+      <div className="space-y-6">
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Notifications</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{notifications.length}</p>
+              </div>
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Bell className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Unread</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{unreadCount}</p>
+              </div>
+              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <Mail className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Read</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{notifications.length - unreadCount}</p>
+              </div>
+              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            {/* Type Filter */}
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="all">All Types</option>
+              <option value="announcement">Announcement</option>
+              <option value="reminder">Reminder</option>
+              <option value="alert">Alert</option>
+              <option value="info">Info</option>
+            </select>
+
+            {/* Priority Filter */}
+            <select
+              value={filterPriority}
+              onChange={(e) => setFilterPriority(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="all">All Priorities</option>
+              <option value="urgent">Urgent</option>
+              <option value="high">High</option>
+              <option value="normal">Normal</option>
+              <option value="low">Low</option>
+            </select>
+
+            {/* Status Filter */}
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="all">All Status</option>
+              <option value="unread">Unread</option>
+              <option value="read">Read</option>
+            </select>
+          </div>
+
+          {/* Action Buttons */}
+          {unreadCount > 0 && (
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={markAllAsRead}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              >
+                <CheckCircle2 className="w-5 h-5" />
+                Mark All as Read
+              </button>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Notifications Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"
+        >
+          {filteredNotifications.length === 0 ? (
+            <div className="p-12 text-center">
+              <Bell className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                No notifications
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                {filterStatus === 'unread' && 'You have read all your notifications!'}
+                {filterStatus === 'read' && 'No read notifications yet.'}
+                {filterStatus === 'all' && 'You have no notifications at the moment.'}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Title
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Priority
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Course
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredNotifications.map((notification, index) => (
+                    <motion.tr
+                      key={notification.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.02 }}
+                      className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
+                        !notification.read_at ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                      }`}
+                    >
+                      {/* Title */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${getTypeBadgeColor(notification.type || 'info').replace('text-', 'bg-').replace('-800', '-100').replace('-200', '-900/20')}`}>
+                            {getTypeIcon(notification.type || 'info')}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              {!notification.read_at && (
+                                <span className="flex h-2 w-2 rounded-full bg-blue-600" />
+                              )}
+                              <p className={`text-sm font-medium text-gray-900 dark:text-white ${!notification.read_at ? 'font-semibold' : ''}`}>
+                                {notification.title}
+                              </p>
+                            </div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 mt-1">
+                              {notification.message}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Type Badge */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getTypeBadgeColor(notification.type || 'info')}`}>
+                          {notification.type === 'announcement' && 'Announcement'}
+                          {notification.type === 'reminder' && 'Reminder'}
+                          {notification.type === 'alert' && 'Alert'}
+                          {notification.type === 'info' && 'Info'}
+                        </span>
+                      </td>
+
+                      {/* Priority Badge */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getPriorityBadgeColor(notification.priority || 'normal')}`}>
+                          {notification.priority === 'urgent' && 'Urgent'}
+                          {notification.priority === 'high' && 'High'}
+                          {notification.priority === 'normal' && 'Normal'}
+                          {notification.priority === 'low' && 'Low'}
+                        </span>
+                      </td>
+
+                      {/* Course */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-900 dark:text-white">
+                          {notification.course?.title || (
+                            <span className="text-gray-500 dark:text-gray-400 italic">Global</span>
+                          )}
+                        </span>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {notification.read_at ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Read
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                            <Mail className="w-3.5 h-3.5" />
+                            Unread
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Date */}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(notification.published_at || notification.created_at).toLocaleDateString('en-US', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => openViewModal(notification)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                            title="View"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          {!notification.read_at && (
+                            <button
+                              onClick={() => markAsRead(notification.id)}
+                              className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                              title="Mark as read"
+                            >
+                              <CheckCircle2 className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => deleteNotification(notification.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* View Modal */}
+      {showViewModal && selectedNotification && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+          >
+            {/* Header with priority color */}
+            <div className={`h-2 ${getPriorityBadgeColor(selectedNotification.priority || 'normal').replace('text-', 'bg-').replace('dark:text-', 'dark:bg-')}`} />
+            
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-3 rounded-lg ${getTypeBadgeColor(selectedNotification.type || 'info').replace('text-', 'bg-').replace('-800', '-100').replace('-200', '-900/20')}`}>
+                      {getTypeIcon(selectedNotification.type || 'info')}
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {selectedNotification.title}
+                      </h2>
+                      {selectedNotification.course && (
+                        <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          <BookOpen className="w-4 h-4" />
+                          {selectedNotification.course.title}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getTypeBadgeColor(selectedNotification.type || 'info')}`}>
+                      {selectedNotification.type === 'announcement' && 'Announcement'}
+                      {selectedNotification.type === 'reminder' && 'Reminder'}
+                      {selectedNotification.type === 'alert' && 'Alert'}
+                      {selectedNotification.type === 'info' && 'Info'}
+                    </span>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getPriorityBadgeColor(selectedNotification.priority || 'normal')}`}>
+                      {selectedNotification.priority === 'urgent' && 'Urgent'}
+                      {selectedNotification.priority === 'high' && 'High'}
+                      {selectedNotification.priority === 'normal' && 'Normal'}
+                      {selectedNotification.priority === 'low' && 'Low'}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={closeViewModal}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 mb-6">
+                <div 
+                  className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
+                  dangerouslySetInnerHTML={{ __html: selectedNotification.message }}
+                />
+              </div>
+
+              {/* Info */}
+              <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>
+                    {new Date(selectedNotification.published_at || selectedNotification.created_at).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+                {selectedNotification.read_at && (
+                  <div className="flex items-center gap-2 text-green-600">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Read on {new Date(selectedNotification.read_at).toLocaleDateString('en-US', {
+                      day: 'numeric',
+                      month: 'short'
+                    })}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={closeViewModal}
+                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors font-medium"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    deleteNotification(selectedNotification.id);
+                  }}
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  Delete
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </StudentLayout>
+  );
+};
+
+export default Notifications;
