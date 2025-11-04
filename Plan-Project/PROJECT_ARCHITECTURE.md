@@ -434,5 +434,5 @@ backend/
 
 <div align="center">
   <p><strong>CoursFlow Architecture v1.0</strong></p>
-  <p>Last Updated: November 2024</p>
+  <p>Last Updated: November 2025</p>
 </div>
