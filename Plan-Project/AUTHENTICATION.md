@@ -844,12 +844,6 @@ curl -X POST http://localhost:8000/api/login \
 
 <div align="center">
 
-## Need Help?
-
-📧 Email: support@coursflow.com  
-🐛 GitHub Issues: [Report an Issue](https://github.com/Mohammed-ES/CoursFlow/issues)  
-💬 Discussions: [Ask Questions](https://github.com/Mohammed-ES/CoursFlow/discussions)
-
 ---
 
 [⬆ Back to README](./README.md) • [📖 View All Documentation](./README.md#-documentation)
