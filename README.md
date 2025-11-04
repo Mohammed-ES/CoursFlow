@@ -242,8 +242,7 @@ Comprehensive documentation is available in the `Plan-Project` folder:
 ## 📞 Support
 
 For issues, questions, or contributions:
-- **GitHub Issues**: [Create an issue](https://github.com/Mohammed-ES/CoursFlow/issues)
-- **Email**: contact@coursflow.com
+- **Email**: mohammedelouazzani.dev@gamil.com
 - **Documentation**: See `Plan-Project` folder
 
 ---
@@ -264,6 +263,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 <div align="center">
-  <p>Made with ❤️ by the CoursFlow Team</p>
-  <p>© 2024 CoursFlow. All rights reserved.</p>
+
+  <p>© 2025 CoursFlow. All rights reserved.</p>
 </div>
