@@ -73,10 +73,21 @@ setup-*.php
 # ==========================================
 # Documentation Temporaire
 # ==========================================
-*.md
+# Allow all important documentation files
 !README.md
 !LICENSE.md
 !CONTRIBUTING.md
+!AUTHENTICATION.md
+!HTTP_HTTPS.md
+!ARCHITECTURE.md
+!INSTALLATION_GUIDE.md
+!KNOWN_ISSUES.md
+!SECURITY_SHARING_GUIDE.md
+!GIT_PUSH_GUIDE.md
+!GITHUB_GUIDE.md
+# Ignore temporary markdown files
+*-temp.md
+*-draft.md
 
 # ==========================================
 # Dossiers de Backup
