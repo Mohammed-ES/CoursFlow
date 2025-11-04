@@ -163,13 +163,13 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 | <img src="https://laravel.com/img/favicon/favicon.ico" width="30"/> | **Laravel Sanctum** | 3.3 | API token authentication |
 | <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" width="30"/> | **Google Gemini API** | 2.5 Flash | AI-powered quiz correction and generation |
 | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/composer/composer-original.svg" width="30"/> | **Composer** | 2.x | PHP dependency manager |
-| <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/phpunit/phpunit-original.svg" width="30"/> | **PHPUnit** | 10.x | Testing framework for PHP |
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/phpunit/phpunit-plain.svg" width="30"/> | **PHPUnit** | 10.x | Testing framework for PHP |
 
 ### <img src="https://cdn-icons-png.flaticon.com/512/2721/2721297.png" width="20" height="20"/> Development Tools
 
 | Logo | Tool | Purpose |
 |------|------|---------|
-| <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/xampp/xampp-original.svg" width="30"/> | **XAMPP** | Local development environment (Apache + MySQL) |
+| <img src="https://cdn.worldvectorlogo.com/logos/xampp.svg" width="30"/> | **XAMPP** | Local development environment (Apache + MySQL) |
 | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/git/git-original.svg" width="30"/> | **Git** | Version control system |
 | <img src="https://www.svgrepo.com/show/354202/postman-icon.svg" width="30"/> | **Postman** | API testing and documentation |
 | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/vscode/vscode-original.svg" width="30"/> | **VS Code** | Code editor with extensions |
@@ -254,8 +254,7 @@ Comprehensive documentation is available in the `Plan-Project` folder:
 
 For issues, questions, or contributions:
 
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red?style=for-the-badge&logo=github)](https://github.com/Mohammed-ES/CoursFlow/issues)
-[![Email](https://img.shields.io/badge/Email-Contact-blue?style=for-the-badge&logo=gmail)](mailto:contact@coursflow.com)
+[![Email](https://img.shields.io/badge/Email-Contact-blue?style=for-the-badge&logo=gmail)](mailto:mohammedelouazzani.dev.com)
 [![Documentation](https://img.shields.io/badge/Documentation-Plan--Project-green?style=for-the-badge&logo=readthedocs)](./Plan-Project)
 
 </div>
